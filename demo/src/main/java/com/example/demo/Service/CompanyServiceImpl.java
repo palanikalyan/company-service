@@ -2,7 +2,6 @@ package com.example.demo.Service;
 
 import com.example.demo.Entity.Company;
 import com.example.demo.Repository.CompanyRepository;
-import com.example.demo.Service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -15,6 +14,8 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public Company addCompany(Company company) {
+        // Ensure client-supplied id (if any) is ignored so the DB generates it
+        company.setId(null);
         return repository.save(company);
     }
 
@@ -27,6 +28,16 @@ public class CompanyServiceImpl implements CompanyService {
         company.setPointOfContact(updated.getPointOfContact());
         company.setAboutCompany(updated.getAboutCompany());
         company.setIsActive(updated.getIsActive());
+    // Financial fields
+    company.setBudget(updated.getBudget());
+    company.setMonthlyBudget(updated.getMonthlyBudget());
+    company.setMomGrowthPercent(updated.getMomGrowthPercent());
+    company.setCurrency(updated.getCurrency());
+    // Bank details
+    company.setBankName(updated.getBankName());
+    company.setAccountNumber(updated.getAccountNumber());
+    company.setIfsc(updated.getIfsc());
+    company.setAccountHolderName(updated.getAccountHolderName());
         return repository.save(company);
     }
 
