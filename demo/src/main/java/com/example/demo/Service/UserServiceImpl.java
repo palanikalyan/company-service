@@ -1,10 +1,13 @@
 package com.example.demo.Service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.example.demo.Entity.User;
 import com.example.demo.Repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -14,6 +17,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User signup(User user) {
+        // Prevent duplicate usernames
         if (repository.findByUsername(user.getUsername()).isPresent()) {
             throw new RuntimeException("Username already exists");
         }
@@ -24,14 +28,25 @@ public class UserServiceImpl implements UserService {
     public String login(String username, String password) {
         User user = repository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
         if (!user.getPassword().equals(password)) {
             throw new RuntimeException("Invalid password");
         }
+
         return "Login successful";
     }
 
     @Override
     public List<User> getAllUsers() {
         return repository.findAll();
+    }
+
+    // 🔹 Admin-only: Delete user by ID
+    @Override
+    public void deleteUser(Long id) {
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("User not found with id: " + id);
+        }
+        repository.deleteById(id);
     }
 }
