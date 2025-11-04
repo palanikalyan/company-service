@@ -29,15 +29,23 @@ public class CompanyServiceImpl implements CompanyService {
         company.setAboutCompany(updated.getAboutCompany());
         company.setIsActive(updated.getIsActive());
     // Financial fields
-    company.setBudget(updated.getBudget());
-    company.setMonthlyBudget(updated.getMonthlyBudget());
-    company.setMomGrowthPercent(updated.getMomGrowthPercent());
-    company.setCurrency(updated.getCurrency());
-    // Bank details
-    company.setBankName(updated.getBankName());
-    company.setAccountNumber(updated.getAccountNumber());
-    company.setIfsc(updated.getIfsc());
-    company.setAccountHolderName(updated.getAccountHolderName());
+    company.setBudget(updated.getBudget());   
+        // Bank details: merge or set as needed
+        if (updated.getBankDetails() != null) {
+            if (company.getBankDetails() == null) {
+                company.setBankDetails(updated.getBankDetails());
+            } else {
+                var existing = company.getBankDetails();
+                var incoming = updated.getBankDetails();
+                existing.setBankName(incoming.getBankName());
+                existing.setAccountNumber(incoming.getAccountNumber());
+                existing.setIfsc(incoming.getIfsc());
+                existing.setAccountHolderName(incoming.getAccountHolderName());
+            }
+        } else {
+            // If client cleared bankDetails, remove it
+            company.setBankDetails(null);
+        }
         return repository.save(company);
     }
 

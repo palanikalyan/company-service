@@ -16,6 +16,11 @@ CREATE TABLE IF NOT EXISTS company (
     monthly_budget DECIMAL(19,2) DEFAULT 0,
     mom_growth_percent DECIMAL(5,2) DEFAULT 0,
     currency VARCHAR(10) DEFAULT 'USD',
+    bank_details_id BIGINT
+ );
+
+CREATE TABLE IF NOT EXISTS bank_details (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     bank_name VARCHAR(200),
     account_number VARCHAR(100),
     ifsc VARCHAR(34),

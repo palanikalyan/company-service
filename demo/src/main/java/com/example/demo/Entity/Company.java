@@ -27,27 +27,14 @@ public class Company {
     @Column(precision = 19, scale = 2)
     private BigDecimal budget;
 
-    @Column(name = "monthly_budget", precision = 19, scale = 2)
-    private BigDecimal monthlyBudget;
 
-    @Column(name = "mom_growth_percent")
-    private Double momGrowthPercent;
 
-    @Column(length = 10)
-    private String currency;
 
-    // Bank details
-    @Column(name = "bank_name", length = 200)
-    private String bankName;
 
-    @Column(name = "account_number", length = 100)
-    private String accountNumber;
-
-    @Column(length = 34)
-    private String ifsc;
-
-    @Column(name = "account_holder", length = 200)
-    private String accountHolderName;
+    // Bank details moved to BankDetails entity
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "bank_details_id")
+    private BankDetails bankDetails;
 
 
 
