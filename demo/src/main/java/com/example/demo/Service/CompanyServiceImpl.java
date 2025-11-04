@@ -1,10 +1,13 @@
 package com.example.demo.Service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.example.demo.Entity.Company;
 import com.example.demo.Repository.CompanyRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -14,7 +17,7 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     public Company addCompany(Company company) {
-        // Ensure client-supplied id (if any) is ignored so the DB generates it
+        // Ensure the ID is always auto-generated
         company.setId(null);
         return repository.save(company);
     }
@@ -22,15 +25,23 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public Company updateCompany(Long id, Company updated) {
         Company company = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Company not found"));
+                .orElseThrow(() -> new RuntimeException("Company not found with id: " + id));
+
+        // Basic details
         company.setName(updated.getName());
         company.setCeoName(updated.getCeoName());
         company.setPointOfContact(updated.getPointOfContact());
         company.setAboutCompany(updated.getAboutCompany());
         company.setIsActive(updated.getIsActive());
-    // Financial fields
-    company.setBudget(updated.getBudget());   
-        // Bank details: merge or set as needed
+        company.setPanNumber(updated.getPanNumber());
+
+        // Financial details
+        company.setBudget(updated.getBudget());
+        company.setMonthlyBudget(updated.getMonthlyBudget());
+        company.setMomGrowthPercent(updated.getMomGrowthPercent());
+        company.setCurrency(updated.getCurrency());
+
+        // Bank details: deep merge or replace
         if (updated.getBankDetails() != null) {
             if (company.getBankDetails() == null) {
                 company.setBankDetails(updated.getBankDetails());
@@ -43,14 +54,18 @@ public class CompanyServiceImpl implements CompanyService {
                 existing.setAccountHolderName(incoming.getAccountHolderName());
             }
         } else {
-            // If client cleared bankDetails, remove it
+            // If cleared by client
             company.setBankDetails(null);
         }
+
         return repository.save(company);
     }
 
     @Override
     public void deleteCompany(Long id) {
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Company not found with id: " + id);
+        }
         repository.deleteById(id);
     }
 
@@ -62,5 +77,15 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public List<Company> getCompaniesByStatus(Boolean isActive) {
         return repository.findByIsActive(isActive);
+    }
+
+    @Override
+    public Company toggleCompanyStatus(Long id, boolean status) {
+        return repository.findById(id)
+                .map(company -> {
+                    company.setIsActive(status);
+                    return repository.save(company);
+                })
+                .orElseThrow(() -> new RuntimeException("Company not found with id: " + id));
     }
 }
