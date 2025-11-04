@@ -1,0 +1,13 @@
+.table thead th {
+  vertical-align: middle;
+  text-align: center;
+}
+.card {
+  border-radius: 12px;
+}
+textarea {
+  resize: none;
+}
+.btn i {
+  margin-right: 4px;
+}
