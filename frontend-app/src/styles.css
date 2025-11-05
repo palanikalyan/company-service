@@ -1,0 +1,135 @@
+/* PrimeNG theme and icons */
+@import "primeng/resources/themes/lara-light-blue/theme.css";
+@import "primeng/resources/primeng.min.css";
+@import "primeicons/primeicons.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { 
+  @apply bg-gray-50 text-gray-900; 
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+}
+
+/* Custom animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-in-out;
+}
+
+/* Compact card styles */
+.p-card {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.p-card .p-card-body {
+  padding: 1rem;
+}
+
+.p-card .p-card-content {
+  padding: 0;
+}
+
+/* Compact table styles */
+.p-datatable-sm .p-datatable-thead > tr > th {
+  background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 0.75rem;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.p-datatable-sm .p-datatable-tbody > tr > td {
+  padding: 0.5rem 0.75rem;
+}
+
+.p-datatable .p-datatable-tbody > tr {
+  transition: all 0.15s ease;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background-color: #eff6ff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Button enhancements with blue-indigo theme */
+.p-button {
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.p-button:hover {
+  transform: translateY(-1px);
+}
+
+.p-button-success {
+  background: linear-gradient(to right, #10b981, #059669);
+  border: none;
+}
+
+.p-button-success:hover {
+  background: linear-gradient(to right, #059669, #047857);
+}
+
+/* Form field spacing */
+.field {
+  margin-bottom: 1rem;
+}
+
+/* Input focus styles with blue-indigo theme */
+.p-inputtext:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: #3b82f6;
+}
+
+/* Tag styles */
+.p-tag {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Paginator compact */
+.p-paginator {
+  padding: 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #3b82f6, #6366f1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #2563eb, #4f46e5);
+}
+
+/* Small helpers */
+.container { @apply max-w-7xl mx-auto p-4; }
+.card { @apply bg-white shadow rounded p-3; }

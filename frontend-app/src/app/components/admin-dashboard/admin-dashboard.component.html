@@ -1,0 +1,150 @@
+<div class="min-h-screen bg-gray-100">
+  <!-- Header -->
+  <header class="bg-white shadow">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+      <div class="flex items-center gap-4">
+        <span class="text-gray-600">Welcome, {{ currentUser?.username }}</span>
+        <button
+          (click)="logout()"
+          class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <div class="container mx-auto px-6 py-6">
+    <div class="bg-white rounded-lg shadow p-2 mb-6 flex gap-2">
+      <button
+        (click)="activeTab = 'companies'"
+        [class.bg-blue-500]="activeTab === 'companies'"
+        [class.text-white]="activeTab === 'companies'"
+        [class.bg-gray-200]="activeTab !== 'companies'"
+        class="px-6 py-3 rounded-lg font-semibold transition"
+      >
+        Companies
+      </button>
+      <button
+        (click)="activeTab = 'users'"
+        [class.bg-blue-500]="activeTab === 'users'"
+        [class.text-white]="activeTab === 'users'"
+        [class.bg-gray-200]="activeTab !== 'users'"
+        class="px-6 py-3 rounded-lg font-semibold transition"
+      >
+        Users
+      </button>
+    </div>
+
+    <!-- Companies Tab -->
+    <div *ngIf="activeTab === 'companies'" class="bg-white rounded-lg shadow overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-800">All Companies</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Company Name</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">CEO</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact Person</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr *ngFor="let company of companies" class="hover:bg-gray-50">
+              <td class="px-6 py-4 text-sm text-gray-900">{{ company.id }}</td>
+              <td class="px-6 py-4 text-sm text-gray-900 font-semibold">{{ company.name }}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">{{ company.ceoName || 'N/A' }}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">{{ company.pointOfContact || 'N/A' }}</td>
+              <td class="px-6 py-4 text-sm">
+                <span
+                  [class.bg-green-100]="company.isActive"
+                  [class.text-green-800]="company.isActive"
+                  [class.bg-red-100]="!company.isActive"
+                  [class.text-red-800]="!company.isActive"
+                  class="px-2 py-1 rounded-full text-xs font-semibold"
+                >
+                  {{ company.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm space-x-2">
+                <button
+                  (click)="toggleCompanyStatus(company.id, !company.isActive)"
+                  [class.bg-green-500]="!company.isActive"
+                  [class.bg-yellow-500]="company.isActive"
+                  class="text-white px-3 py-1 rounded hover:opacity-80 transition"
+                >
+                  {{ company.isActive ? 'Deactivate' : 'Activate' }}
+                </button>
+                <button
+                  (click)="deleteCompany(company.id)"
+                  class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="companies.length === 0" class="px-6 py-8 text-center text-gray-500">
+          No companies found
+        </div>
+      </div>
+    </div>
+
+    <!-- Users Tab -->
+    <div *ngIf="activeTab === 'users'" class="bg-white rounded-lg shadow overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-800">All Users</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr *ngFor="let user of users" class="hover:bg-gray-50">
+              <td class="px-6 py-4 text-sm text-gray-900">{{ user.id }}</td>
+              <td class="px-6 py-4 text-sm text-gray-900">{{ user.username }}</td>
+              <td class="px-6 py-4 text-sm text-gray-600">{{ user.email }}</td>
+              <td class="px-6 py-4 text-sm">
+                <span
+                  [class.bg-purple-100]="user.role === 'ADMIN'"
+                  [class.text-purple-800]="user.role === 'ADMIN'"
+                  [class.bg-blue-100]="user.role !== 'ADMIN'"
+                  [class.text-blue-800]="user.role !== 'ADMIN'"
+                  class="px-2 py-1 rounded-full text-xs font-semibold"
+                >
+                  {{ user.role }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm">
+                <button
+                  (click)="deleteUser(user.id)"
+                  [disabled]="user.role === 'ADMIN'"
+                  class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="users.length === 0" class="px-6 py-8 text-center text-gray-500">
+          No users found
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -8,6 +8,8 @@ public interface UserService {
     User signup(User user);
     String login(String username, String password);
     List<User> getAllUsers();
+    User findByUsername(String username);
+    User findById(Long id);
 
     // 🔹 Added for Admin use
     void deleteUser(Long id);

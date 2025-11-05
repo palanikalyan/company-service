@@ -1,0 +1,199 @@
+<div class="py-4">
+  <!-- Compact Header Section -->
+  <div class="mb-4 flex items-center justify-between bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+    <div class="flex items-center gap-3">
+      <div class="bg-gradient-to-br from-blue-600 to-indigo-600 p-2 rounded-lg">
+        <i class="pi pi-building text-white text-xl"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">Companies</h1>
+        <p class="text-gray-500 text-sm">Manage your portfolio</p>
+      </div>
+    </div>
+    <button pButton 
+            label="Add Company" 
+            icon="pi pi-plus" 
+            routerLink="/companies/new"
+            class="p-button-success"
+            *ngIf="currentUser?.role === 'ADMIN'"></button>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-md shadow-sm">
+    <div class="flex items-center text-sm">
+      <i class="pi pi-exclamation-triangle mr-2"></i>
+      <div class="flex-1">{{ error }}</div>
+      <button pButton 
+              label="Retry" 
+              icon="pi pi-refresh" 
+              (click)="load()" 
+              class="p-button-sm p-button-outlined p-button-danger"></button>
+    </div>
+  </div>
+
+  <!-- Data Table Card -->
+  <p-card class="shadow-md">
+    <p-table [value]="companies" 
+             [loading]="loading" 
+             [paginator]="true" 
+             [rows]="10" 
+             [rowsPerPageOptions]="[5, 10, 25, 50]"
+             [globalFilterFields]="['name', 'ceoName', 'pointOfContact']" 
+             responsiveLayout="scroll"
+             styleClass="p-datatable-sm p-datatable-gridlines"
+             [tableStyle]="{'min-width': '60rem'}"
+             #dt>
+      
+      <!-- Table Caption with Search -->
+      <ng-template pTemplate="caption">
+        <div class="flex items-center justify-between py-2">
+          <div class="flex items-center gap-2">
+            <span class="text-lg font-semibold text-gray-700">Company Directory</span>
+            <span class="px-2 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full text-xs font-medium">
+              {{ companies.length }}
+            </span>
+          </div>
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input pInputText 
+                   #globalFilter
+                   type="text" 
+                   (input)="$any(dt).filterGlobal(globalFilter.value, 'contains')" 
+                   placeholder="Search..."
+                   class="p-inputtext-sm" />
+          </span>
+        </div>
+      </ng-template>
+
+      <!-- Table Header -->
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="id" style="width: 70px">
+            <div class="flex items-center gap-1 text-xs">
+              ID <p-sortIcon field="id"></p-sortIcon>
+            </div>
+          </th>
+          <th pSortableColumn="name">
+            <div class="flex items-center gap-1 text-xs">
+              COMPANY NAME <p-sortIcon field="name"></p-sortIcon>
+            </div>
+          </th>
+          <th pSortableColumn="ceoName">
+            <div class="flex items-center gap-1 text-xs">
+              CEO <p-sortIcon field="ceoName"></p-sortIcon>
+            </div>
+          </th>
+          <th pSortableColumn="pointOfContact">
+            <div class="flex items-center gap-1 text-xs">
+              POINT OF CONTACT <p-sortIcon field="pointOfContact"></p-sortIcon>
+            </div>
+          </th>
+          <th class="text-xs">BUDGET</th>
+          <th pSortableColumn="isActive" style="width: 100px">
+            <div class="flex items-center gap-1 text-xs">
+              STATUS <p-sortIcon field="isActive"></p-sortIcon>
+            </div>
+          </th>
+          <th style="width: 100px" class="text-xs">ACTIONS</th>
+        </tr>
+      </ng-template>
+
+      <!-- Table Body -->
+      <ng-template pTemplate="body" let-company>
+        <tr class="hover:bg-blue-50 transition-colors text-sm">
+          <td>
+            <span class="text-gray-500 font-mono text-xs">#{{ company.id }}</span>
+          </td>
+          <td>
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                {{ company.name?.charAt(0) || '?' }}
+              </div>
+              <div>
+                <div class="font-semibold text-gray-800">{{ company.name }}</div>
+                <div class="text-xs text-gray-500">{{ company.aboutCompany?.substring(0, 30) }}{{ company.aboutCompany?.length > 30 ? '...' : '' }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="flex items-center gap-1">
+              <i class="pi pi-user text-gray-400 text-xs"></i>
+              <span class="text-gray-700 text-sm">{{ company.ceoName || 'N/A' }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="flex items-center gap-1">
+              <i class="pi pi-phone text-gray-400 text-xs"></i>
+              <span class="text-gray-700 text-sm">{{ company.pointOfContact || 'N/A' }}</span>
+            </div>
+          </td>
+          <td>
+            <div *ngIf="company.budget" class="flex flex-col">
+              <span class="font-semibold text-green-600 text-sm">{{ company.budget | currency:'USD':'symbol':'1.0-0' }}</span>
+              <span class="text-xs text-gray-500">{{ company.currency || 'USD' }}</span>
+            </div>
+            <span *ngIf="!company.budget" class="text-gray-400 text-sm">-</span>
+          </td>
+          <td>
+            <p-tag *ngIf="company.isActive" 
+                   value="Active" 
+                   severity="success" 
+                   [rounded]="true"
+                   [style]="{'font-size': '0.75rem'}"
+                   icon="pi pi-check-circle"></p-tag>
+            <p-tag *ngIf="!company.isActive" 
+                   value="Inactive" 
+                   severity="danger" 
+                   [rounded]="true"
+                   [style]="{'font-size': '0.75rem'}"
+                   icon="pi pi-times-circle"></p-tag>
+          </td>
+          <td>
+            <div class="flex gap-1">
+              <button pButton 
+                      icon="pi pi-eye" 
+                      class="p-button-rounded p-button-sm p-button-text p-button-info" 
+                      pTooltip="View"
+                      tooltipPosition="top"
+                      [routerLink]="['/companies', company.id]"
+                      *ngIf="canView(company)"></button>
+              <button pButton 
+                      icon="pi pi-pencil" 
+                      class="p-button-rounded p-button-sm p-button-text p-button-warning" 
+                      pTooltip="Edit"
+                      tooltipPosition="top"
+                      [routerLink]="['/companies', company.id]"
+                      *ngIf="canEdit(company)"></button>
+              <button pButton 
+                      icon="pi pi-external-link" 
+                      class="p-button-rounded p-button-sm p-button-text p-button-success" 
+                      pTooltip="Go to Projects"
+                      tooltipPosition="top"
+                      (click)="goToProjects(company)"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Empty State -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7">
+            <div class="text-center py-8">
+              <div class="bg-gray-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="pi pi-inbox text-3xl text-gray-400"></i>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-700 mb-1">No Companies Found</h3>
+              <p class="text-gray-500 text-sm mb-3">Get started by adding your first company</p>
+              <button pButton 
+                      label="Add Company" 
+                      icon="pi pi-plus" 
+                      routerLink="/companies/new"
+                      class="p-button-sm"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</div>

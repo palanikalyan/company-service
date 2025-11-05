@@ -1,11 +1,13 @@
 package com.example.demo.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.example.demo.Entity.Company;
 import com.example.demo.Repository.CompanyRepository;
+import com.example.demo.Repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -14,12 +16,23 @@ import lombok.RequiredArgsConstructor;
 public class CompanyServiceImpl implements CompanyService {
 
     private final CompanyRepository repository;
+    private final UserRepository userRepository;
 
     @Override
-    public Company addCompany(Company company) {
+    public Company addCompany(Company company, Long userId) {
         // Ensure the ID is always auto-generated
         company.setId(null);
-        return repository.save(company);
+        Company savedCompany = repository.save(company);
+        
+        // If userId is provided, associate the company with the user
+        if (userId != null) {
+            userRepository.findById(userId).ifPresent(user -> {
+                user.getCompanies().add(savedCompany);
+                userRepository.save(user);
+            });
+        }
+        
+        return savedCompany;
     }
 
     @Override
@@ -87,5 +100,17 @@ public class CompanyServiceImpl implements CompanyService {
                     return repository.save(company);
                 })
                 .orElseThrow(() -> new RuntimeException("Company not found with id: " + id));
+    }
+
+    @Override
+    public List<Company> getCompaniesByUserId(Long userId) {
+        return userRepository.findById(userId)
+                .map(user -> user.getCompanies())
+                .orElse(List.of());
+    }
+
+    @Override
+    public Optional<Company> getCompanyById(Long id) {
+        return repository.findById(id);
     }
 }

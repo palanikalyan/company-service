@@ -1,0 +1,405 @@
+<div class="max-w-4xl mx-auto p-6">
+  <div class="mb-4 flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-800">Company Details</h1>
+    <div class="flex gap-2">
+      <button pButton 
+              label="Back to List" 
+              icon="pi pi-arrow-left"
+              class="p-button-outlined p-button-secondary"
+              routerLink="/company/dashboard"></button>
+    </div>
+  </div>
+
+  <div *ngIf="successMessage" class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="bankSuccessMessage" class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+    {{ bankSuccessMessage }}
+  </div>
+
+  <div *ngIf="bankErrorMessage" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+    {{ bankErrorMessage }}
+  </div>
+
+  <!-- Tabs for Company and Bank Details -->
+  <p-tabView *ngIf="company">
+    <!-- Company Details Tab -->
+    <p-tabPanel header="Company Information" leftIcon="pi pi-building">
+      <div class="mb-4 flex justify-end">
+        <button pButton 
+                *ngIf="!editMode && canEdit()"
+                label="Edit Company" 
+                icon="pi pi-pencil"
+                class="p-button-outlined p-button-warning"
+                (click)="toggleEditMode()"></button>
+      </div>
+
+      <!-- View Mode -->
+      <p-card *ngIf="!editMode" class="shadow-lg">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+        <label class="block text-sm font-semibold text-gray-600 mb-1">Company Name</label>
+        <p class="text-lg text-gray-900">{{ company.name }}</p>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-semibold text-gray-600 mb-1">CEO</label>
+        <p class="text-lg text-gray-900">{{ company.ceoName || 'N/A' }}</p>
+      </div>
+      
+      <div class="md:col-span-2">
+        <label class="block text-sm font-semibold text-gray-600 mb-2">Point of Contact (SPOC)</label>
+        <div *ngIf="company.pointOfContact" class="space-y-2">
+          <div *ngFor="let spoc of company.pointOfContact.split(','); let i = index" 
+               class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+              <div class="flex items-center gap-2">
+                <i class="pi pi-user text-blue-600"></i>
+                <span class="font-medium">{{ spoc.trim() || 'N/A' }}</span>
+              </div>
+              <div *ngIf="(company as any).spocPhoneNumbers?.split(',')[i]" class="flex items-center gap-2">
+                <i class="pi pi-phone text-green-600"></i>
+                <span>{{ (company as any).spocPhoneNumbers.split(',')[i].trim() }}</span>
+              </div>
+              <div *ngIf="(company as any).spocEmails?.split(',')[i]" class="flex items-center gap-2">
+                <i class="pi pi-envelope text-purple-600"></i>
+                <span>{{ (company as any).spocEmails.split(',')[i].trim() }}</span>
+              </div>
+              <div *ngIf="(company as any).spocDesignations?.split(',')[i]" class="flex items-center gap-2">
+                <i class="pi pi-briefcase text-orange-600"></i>
+                <span>{{ (company as any).spocDesignations.split(',')[i].trim() }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p *ngIf="!company.pointOfContact" class="text-lg text-gray-900">N/A</p>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-semibold text-gray-600 mb-1">Budget</label>
+        <p class="text-lg text-gray-900">{{ company.budget ? (company.currency || 'USD') + ' ' + company.budget : 'N/A' }}</p>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-semibold text-gray-600 mb-1">Monthly Budget</label>
+        <p class="text-lg text-gray-900">{{ company.monthlyBudget ? (company.currency || 'USD') + ' ' + company.monthlyBudget : 'N/A' }}</p>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-semibold text-gray-600 mb-1">Growth Rate</label>
+        <p class="text-lg text-gray-900">{{ company.momGrowthPercent ? company.momGrowthPercent + '%' : 'N/A' }}</p>
+      </div>
+      
+      <div class="col-span-2">
+        <label class="block text-sm font-semibold text-gray-600 mb-1">About Company</label>
+        <p class="text-lg text-gray-900">{{ company.aboutCompany || 'N/A' }}</p>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-semibold text-gray-600 mb-1">Status</label>
+        <p class="text-lg">
+          <span [class]="company.isActive ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'">
+            {{ company.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </p>
+      </div>
+    </div>
+  </p-card>
+
+  <!-- Edit Mode -->
+  <p-card *ngIf="editMode" class="shadow-lg">
+    <form [formGroup]="editForm" (ngSubmit)="saveChanges()">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Company Name -->
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-semibold text-gray-700">Company Name *</label>
+          <input pInputText 
+                 formControlName="name" 
+                 placeholder="Enter company name"
+                 class="w-full"
+                 [class.border-red-500]="editForm.get('name')?.invalid && editForm.get('name')?.touched" />
+          <small class="text-red-500" *ngIf="editForm.get('name')?.invalid && editForm.get('name')?.touched">
+            {{ getFieldError('name') }}
+          </small>
+        </div>
+
+        <!-- CEO Name -->
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-semibold text-gray-700">CEO Name</label>
+          <input pInputText 
+                 formControlName="ceoName" 
+                 placeholder="Enter CEO name"
+                 class="w-full" />
+        </div>
+
+        <!-- Point of Contact (Multiple SPOCs) -->
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-sm font-semibold text-gray-700">Point of Contact (SPOC)</label>
+            <button pButton 
+                    type="button"
+                    label="Add SPOC" 
+                    icon="pi pi-plus"
+                    class="p-button-sm p-button-success"
+                    (click)="addSpoc()"></button>
+          </div>
+          
+          <div *ngFor="let spoc of spocs; let i = index; trackBy: trackByIndex" 
+               class="mb-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold text-gray-600">SPOC #{{ i + 1 }}</span>
+              <button pButton 
+                      type="button"
+                      icon="pi pi-trash" 
+                      class="p-button-danger p-button-text p-button-sm"
+                      [disabled]="spocs.length === 1"
+                      pTooltip="Remove SPOC"
+                      (click)="removeSpoc(i)"></button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <!-- Name -->
+              <span class="p-input-icon-left">
+                <i class="pi pi-user"></i>
+                <input pInputText 
+                       [(ngModel)]="spocs[i]" 
+                       [ngModelOptions]="{standalone: true}"
+                       placeholder="Name"
+                       class="w-full" />
+              </span>
+              
+              <!-- Phone -->
+              <span class="p-input-icon-left">
+                <i class="pi pi-phone"></i>
+                <input pInputText 
+                       [(ngModel)]="spocPhones[i]" 
+                       [ngModelOptions]="{standalone: true}"
+                       type="tel"
+                       placeholder="Phone"
+                       class="w-full" />
+              </span>
+              
+              <!-- Email -->
+              <span class="p-input-icon-left">
+                <i class="pi pi-envelope"></i>
+                <input pInputText 
+                       [(ngModel)]="spocEmails[i]" 
+                       [ngModelOptions]="{standalone: true}"
+                       type="email"
+                       placeholder="Email"
+                       class="w-full" />
+              </span>
+              
+              <!-- Designation -->
+              <span class="p-input-icon-left">
+                <i class="pi pi-briefcase"></i>
+                <input pInputText 
+                       [(ngModel)]="spocDesignations[i]" 
+                       [ngModelOptions]="{standalone: true}"
+                       placeholder="Designation"
+                       class="w-full" />
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Currency -->
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-semibold text-gray-700">Currency</label>
+          <input pInputText 
+                 formControlName="currency" 
+                 placeholder="USD"
+                 class="w-full" />
+        </div>
+
+        <!-- Budget -->
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-semibold text-gray-700">Budget</label>
+          <input pInputText 
+                 type="number" 
+                 formControlName="budget" 
+                 placeholder="Enter budget"
+                 class="w-full" />
+        </div>
+
+        <!-- Monthly Budget -->
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-semibold text-gray-700">Monthly Budget</label>
+          <input pInputText 
+                 type="number" 
+                 formControlName="monthlyBudget" 
+                 placeholder="Enter monthly budget"
+                 class="w-full" />
+        </div>
+
+        <!-- Growth Percent -->
+        <div class="flex flex-col gap-1 md:col-span-2">
+          <label class="text-sm font-semibold text-gray-700">MoM Growth %</label>
+          <input pInputText 
+                 type="number" 
+                 formControlName="momGrowthPercent" 
+                 placeholder="Enter growth percentage"
+                 class="w-full" />
+        </div>
+
+        <!-- About Company -->
+        <div class="flex flex-col gap-1 md:col-span-2">
+          <label class="text-sm font-semibold text-gray-700">About Company</label>
+          <textarea pInputTextarea 
+                    formControlName="aboutCompany" 
+                    placeholder="Enter company description"
+                    rows="4"
+                    class="w-full"></textarea>
+          <small class="text-gray-500">Maximum 500 characters</small>
+        </div>
+
+        <!-- Active Status -->
+        <div class="flex items-center gap-2 md:col-span-2">
+          <p-checkbox formControlName="isActive" 
+                     [binary]="true" 
+                     inputId="isActive"></p-checkbox>
+          <label for="isActive" class="text-sm font-semibold text-gray-700">Company is Active</label>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-2 mt-6 justify-end">
+        <button pButton 
+                type="button"
+                label="Cancel" 
+                icon="pi pi-times"
+                class="p-button-outlined p-button-secondary"
+                [disabled]="submitting"
+                (click)="cancelEdit()"></button>
+        <button pButton 
+                type="submit"
+                label="Save Changes" 
+                icon="pi pi-check"
+                class="p-button-success"
+                [disabled]="submitting"
+                [loading]="submitting"></button>
+      </div>
+    </form>
+  </p-card>
+    </p-tabPanel>
+
+    <!-- Bank Details Tab -->
+    <p-tabPanel header="Bank Details" leftIcon="pi pi-credit-card">
+      <div class="mb-4 flex justify-end">
+        <button pButton 
+                *ngIf="!bankEditMode && canEdit()"
+                label="Edit Bank Details" 
+                icon="pi pi-pencil"
+                class="p-button-outlined p-button-warning"
+                (click)="toggleBankEditMode()"></button>
+      </div>
+
+      <!-- Bank View Mode -->
+      <p-card *ngIf="!bankEditMode" class="shadow-lg">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-600 mb-1">Bank Name</label>
+            <p class="text-lg text-gray-900">{{ company.bankDetails?.bankName || 'Not Provided' }}</p>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-gray-600 mb-1">Account Number</label>
+            <p class="text-lg text-gray-900">{{ company.bankDetails?.accountNumber || 'Not Provided' }}</p>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-gray-600 mb-1">IFSC Code</label>
+            <p class="text-lg text-gray-900">{{ company.bankDetails?.ifsc || 'Not Provided' }}</p>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-semibold text-gray-600 mb-1">Account Holder Name</label>
+            <p class="text-lg text-gray-900">{{ company.bankDetails?.accountHolderName || 'Not Provided' }}</p>
+          </div>
+        </div>
+      </p-card>
+
+      <!-- Bank Edit Mode -->
+      <p-card *ngIf="bankEditMode" class="shadow-lg">
+        <form [formGroup]="bankForm" (ngSubmit)="saveBankDetails()">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Bank Name -->
+            <div class="flex flex-col gap-1">
+              <label class="text-sm font-semibold text-gray-700">Bank Name *</label>
+              <input pInputText 
+                     formControlName="bankName" 
+                     placeholder="Enter bank name"
+                     class="w-full"
+                     [class.border-red-500]="bankForm.get('bankName')?.invalid && bankForm.get('bankName')?.touched" />
+              <small class="text-red-500" *ngIf="bankForm.get('bankName')?.invalid && bankForm.get('bankName')?.touched">
+                {{ getBankFieldError('bankName') }}
+              </small>
+            </div>
+
+            <!-- Account Number -->
+            <div class="flex flex-col gap-1">
+              <label class="text-sm font-semibold text-gray-700">Account Number *</label>
+              <input pInputText 
+                     formControlName="accountNumber" 
+                     placeholder="Enter account number"
+                     class="w-full"
+                     [class.border-red-500]="bankForm.get('accountNumber')?.invalid && bankForm.get('accountNumber')?.touched" />
+              <small class="text-red-500" *ngIf="bankForm.get('accountNumber')?.invalid && bankForm.get('accountNumber')?.touched">
+                {{ getBankFieldError('accountNumber') }}
+              </small>
+            </div>
+
+            <!-- IFSC Code -->
+            <div class="flex flex-col gap-1">
+              <label class="text-sm font-semibold text-gray-700">IFSC Code *</label>
+              <input pInputText 
+                     formControlName="ifsc" 
+                     placeholder="Enter IFSC code"
+                     class="w-full"
+                     [class.border-red-500]="bankForm.get('ifsc')?.invalid && bankForm.get('ifsc')?.touched" />
+              <small class="text-red-500" *ngIf="bankForm.get('ifsc')?.invalid && bankForm.get('ifsc')?.touched">
+                {{ getBankFieldError('ifsc') }}
+              </small>
+            </div>
+
+            <!-- Account Holder Name -->
+            <div class="flex flex-col gap-1">
+              <label class="text-sm font-semibold text-gray-700">Account Holder Name *</label>
+              <input pInputText 
+                     formControlName="accountHolderName" 
+                     placeholder="Enter account holder name"
+                     class="w-full"
+                     [class.border-red-500]="bankForm.get('accountHolderName')?.invalid && bankForm.get('accountHolderName')?.touched" />
+              <small class="text-red-500" *ngIf="bankForm.get('accountHolderName')?.invalid && bankForm.get('accountHolderName')?.touched">
+                {{ getBankFieldError('accountHolderName') }}
+              </small>
+            </div>
+          </div>
+
+          <!-- Bank Action Buttons -->
+          <div class="flex gap-2 mt-6 justify-end">
+            <button pButton 
+                    type="button"
+                    label="Cancel" 
+                    icon="pi pi-times"
+                    class="p-button-outlined p-button-secondary"
+                    [disabled]="bankSubmitting"
+                    (click)="cancelBankEdit()"></button>
+            <button pButton 
+                    type="submit"
+                    label="Save Bank Details" 
+                    icon="pi pi-check"
+                    class="p-button-success"
+                    [disabled]="bankSubmitting"
+                    [loading]="bankSubmitting"></button>
+          </div>
+        </form>
+      </p-card>
+    </p-tabPanel>
+  </p-tabView>
+</div>

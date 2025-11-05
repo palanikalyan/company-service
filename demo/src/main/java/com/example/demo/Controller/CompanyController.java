@@ -11,13 +11,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/companies")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class CompanyController {
 
     private final CompanyService service;
 
     @PostMapping
-    public ResponseEntity<Company> addCompany(@RequestBody Company company) {
-        return ResponseEntity.ok(service.addCompany(company));
+    public ResponseEntity<Company> addCompany(
+            @RequestBody Company company,
+            @RequestParam(required = false) Long userId) {
+        return ResponseEntity.ok(service.addCompany(company, userId));
     }
 
     @PutMapping("/{id}")
@@ -32,8 +35,29 @@ public class CompanyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Company>> getAllCompanies() {
+    public ResponseEntity<List<Company>> getAllCompanies(
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) Long userId) {
+        
+        // If role is ADMIN, return all companies
+        if ("ADMIN".equals(role)) {
+            return ResponseEntity.ok(service.getAllCompanies());
+        }
+        
+        // If role is COMPANY and userId is provided, return only their company
+        if ("COMPANY".equals(role) && userId != null) {
+            return ResponseEntity.ok(service.getCompaniesByUserId(userId));
+        }
+        
+        // Default: return all companies (for backward compatibility)
         return ResponseEntity.ok(service.getAllCompanies());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Company> getCompanyById(@PathVariable Long id) {
+        return service.getCompanyById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/status/{isActive}")

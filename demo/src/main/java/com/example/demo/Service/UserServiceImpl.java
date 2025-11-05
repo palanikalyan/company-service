@@ -41,6 +41,16 @@ public class UserServiceImpl implements UserService {
         return repository.findAll();
     }
 
+    @Override
+    public User findByUsername(String username) {
+        return repository.findByUsername(username).orElse(null);
+    }
+
+    @Override
+    public User findById(Long id) {
+        return repository.findById(id).orElse(null);
+    }
+
     // 🔹 Admin-only: Delete user by ID
     @Override
     public void deleteUser(Long id) {

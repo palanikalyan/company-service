@@ -9,15 +9,21 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
 
     private final UserService service;
 
     @PostMapping("/signup")
-    public ResponseEntity<User> signup(@RequestBody User user) {
-        return ResponseEntity.ok(service.signup(user));
+    public ResponseEntity<?> signup(@RequestBody User user) {
+        try {
+            User createdUser = service.signup(user);
+            return ResponseEntity.ok(createdUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/login")
@@ -26,7 +32,7 @@ public class UserController {
     }
 
     // ✅ New endpoint - get all users
-    @GetMapping("/users")
+    @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(service.getAllUsers());
     }

@@ -17,17 +17,60 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class AdminController {
 
     private final UserService userService;
     private final CompanyService companyService;
     private final BankDetailsService bankService;
 
+    // ===================== AUTHENTICATION =====================
+    
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        User user = userService.findByUsername(loginRequest.getUsername());
+        if (user != null && user.getPassword().equals(loginRequest.getPassword())) {
+            List<LoginResponse.CompanyInfo> companyInfoList = user.getCompanies().stream()
+                .map(company -> new LoginResponse.CompanyInfo(company.getId(), company.getName()))
+                .toList();
+            
+            LoginResponse response = new LoginResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getRole(),
+                user.getEmail(),
+                companyInfoList
+            );
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.status(401).body("Invalid credentials");
+    }
+
     // ===================== USER MANAGEMENT =====================
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<LoginResponse> getUserById(@PathVariable Long id) {
+        User user = userService.findById(id);
+        if (user != null) {
+            List<LoginResponse.CompanyInfo> companyInfoList = user.getCompanies().stream()
+                .map(company -> new LoginResponse.CompanyInfo(company.getId(), company.getName()))
+                .toList();
+            
+            LoginResponse response = new LoginResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getRole(),
+                user.getEmail(),
+                companyInfoList
+            );
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/users/{id}")

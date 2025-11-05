@@ -1,0 +1,305 @@
+<div class="min-h-screen bg-gray-50 py-4">
+  <div class="max-w-6xl mx-auto px-4">
+    <!-- Header Section -->
+    <div class="mb-4">
+      <div class="flex items-center gap-3">
+        <button pButton 
+                icon="pi pi-arrow-left" 
+                class="p-button-text p-button-rounded p-button-sm hover:bg-gray-100" 
+                routerLink="/"
+                pTooltip="Back to list"
+                tooltipPosition="right"></button>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Create New Company</h1>
+          <p class="text-gray-500 text-sm">Fill in the details to add a new company</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Message -->
+    <div *ngIf="successMessage" 
+         class="mb-3 p-3 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-md shadow-sm animate-fade-in">
+      <div class="flex items-center">
+        <i class="pi pi-check-circle mr-2 text-lg"></i>
+        <div class="text-sm font-medium">{{ successMessage }}</div>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" 
+         class="mb-3 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-md shadow-sm animate-fade-in">
+      <div class="flex items-center">
+        <i class="pi pi-exclamation-triangle mr-2 text-lg"></i>
+        <div class="text-sm font-medium">{{ errorMessage }}</div>
+      </div>
+    </div>
+
+    <!-- Form Card -->
+    <p-card class="shadow-lg border border-gray-200">
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <!-- Basic Information Section -->
+        <div class="mb-6">
+          <div class="flex items-center gap-2 mb-4 pb-2 border-b border-blue-200">
+            <div class="bg-blue-100 p-2 rounded">
+              <i class="pi pi-building text-blue-600 text-lg"></i>
+            </div>
+            <h2 class="text-lg font-bold text-gray-800">Basic Information</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="field md:col-span-2">
+              <label for="name" class="block text-xs font-semibold text-gray-700 mb-1">
+                Company Name <span class="text-red-500">*</span>
+              </label>
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-briefcase text-gray-400 text-sm"></i>
+                <input pInputText 
+                       id="name" 
+                       formControlName="name" 
+                       type="text" 
+                       placeholder="e.g., TechCorp Inc."
+                       [class.border-red-500]="form.get('name')?.invalid && form.get('name')?.touched"
+                       [class.border-green-500]="form.get('name')?.valid && form.get('name')?.touched"
+                       class="w-full" />
+              </span>
+              <small class="text-red-600 mt-1 flex items-center gap-1 text-xs" 
+                     *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+                <i class="pi pi-exclamation-circle"></i> 
+                {{ getFieldError('name') }}
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="ceoName" class="block text-xs font-semibold text-gray-700 mb-1">CEO Name</label>
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-user text-gray-400 text-sm"></i>
+                <input pInputText 
+                       id="ceoName" 
+                       formControlName="ceoName" 
+                       type="text" 
+                       placeholder="e.g., John Smith"
+                       [class.border-red-500]="form.get('ceoName')?.invalid && form.get('ceoName')?.touched"
+                       [class.border-green-500]="form.get('ceoName')?.valid && form.get('ceoName')?.touched"
+                       class="w-full" />
+              </span>
+              <small class="text-red-600 mt-1 flex items-center gap-1 text-xs" 
+                     *ngIf="form.get('ceoName')?.invalid && form.get('ceoName')?.touched">
+                <i class="pi pi-exclamation-circle"></i> 
+                {{ getFieldError('ceoName') }}
+              </small>
+            </div>
+
+            <!-- Multiple SPOCs Section -->
+            <div class="field md:col-span-2">
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-xs font-semibold text-gray-700">
+                  Point of Contact (SPOC)
+                </label>
+                <button pButton 
+                        type="button"
+                        label="Add SPOC" 
+                        icon="pi pi-plus"
+                        class="p-button-sm p-button-outlined p-button-success"
+                        (click)="addSpoc()"></button>
+              </div>
+              
+              <div *ngFor="let spoc of spocs; let i = index; trackBy: trackByIndex" 
+                   class="mb-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold text-gray-600">SPOC #{{ i + 1 }}</span>
+                  <button pButton 
+                          type="button"
+                          icon="pi pi-trash" 
+                          class="p-button-sm p-button-outlined p-button-danger"
+                          [disabled]="spocs.length === 1"
+                          (click)="removeSpoc(i)"
+                          pTooltip="Remove SPOC"
+                          tooltipPosition="left"></button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <!-- Name -->
+                  <span class="p-input-icon-left w-full">
+                    <i class="pi pi-user text-gray-400 text-sm"></i>
+                    <input pInputText 
+                           [(ngModel)]="spocs[i]"
+                           [ngModelOptions]="{standalone: true}"
+                           type="text" 
+                           placeholder="Name (e.g., Jane Doe)"
+                           class="w-full" />
+                  </span>
+                  
+                  <!-- Phone -->
+                  <span class="p-input-icon-left w-full">
+                    <i class="pi pi-phone text-gray-400 text-sm"></i>
+                    <input pInputText 
+                           [(ngModel)]="spocPhones[i]"
+                           [ngModelOptions]="{standalone: true}"
+                           type="tel" 
+                           placeholder="Phone (e.g., +1 234 567 8900)"
+                           class="w-full" />
+                  </span>
+                  
+                  <!-- Email -->
+                  <span class="p-input-icon-left w-full">
+                    <i class="pi pi-envelope text-gray-400 text-sm"></i>
+                    <input pInputText 
+                           [(ngModel)]="spocEmails[i]"
+                           [ngModelOptions]="{standalone: true}"
+                           type="email" 
+                           placeholder="Email (e.g., jane@company.com)"
+                           class="w-full" />
+                  </span>
+                  
+                  <!-- Designation -->
+                  <span class="p-input-icon-left w-full">
+                    <i class="pi pi-briefcase text-gray-400 text-sm"></i>
+                    <input pInputText 
+                           [(ngModel)]="spocDesignations[i]"
+                           [ngModelOptions]="{standalone: true}"
+                           type="text" 
+                           placeholder="Designation (e.g., Project Manager)"
+                           class="w-full" />
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="field md:col-span-2">
+              <label for="about" class="block text-xs font-semibold text-gray-700 mb-1">
+                About Company
+                <span class="text-gray-500 text-xs font-normal ml-2">({{ form.get('aboutCompany')?.value?.length || 0 }}/500)</span>
+              </label>
+              <textarea id="about" 
+                        formControlName="aboutCompany" 
+                        placeholder="Brief description..."
+                        [class.border-red-500]="form.get('aboutCompany')?.invalid && form.get('aboutCompany')?.touched"
+                        [class.border-green-500]="form.get('aboutCompany')?.valid && form.get('aboutCompany')?.value"
+                        class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        rows="3"></textarea>
+              <small class="text-red-600 mt-1 flex items-center gap-1 text-xs" 
+                     *ngIf="form.get('aboutCompany')?.invalid && form.get('aboutCompany')?.touched">
+                <i class="pi pi-exclamation-circle"></i> 
+                {{ getFieldError('aboutCompany') }}
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Financial Information Section -->
+        <div class="mb-6">
+          <div class="flex items-center gap-2 mb-4 pb-2 border-b border-green-200">
+            <div class="bg-green-100 p-2 rounded">
+              <i class="pi pi-dollar text-green-600 text-lg"></i>
+            </div>
+            <h2 class="text-lg font-bold text-gray-800">Financial Information</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="field">
+              <label for="budget" class="block text-xs font-semibold text-gray-700 mb-1">Total Budget</label>
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-money-bill text-gray-400 text-sm"></i>
+                <input pInputText 
+                       id="budget" 
+                       formControlName="budget" 
+                       type="number" 
+                       step="0.01"
+                       placeholder="1000000"
+                       [class.border-red-500]="form.get('budget')?.invalid && form.get('budget')?.touched"
+                       [class.border-green-500]="form.get('budget')?.valid && form.get('budget')?.value"
+                       class="w-full" />
+              </span>
+            </div>
+
+            <div class="field">
+              <label for="monthlyBudget" class="block text-xs font-semibold text-gray-700 mb-1">Monthly Budget</label>
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-calendar text-gray-400 text-sm"></i>
+                <input pInputText 
+                       id="monthlyBudget" 
+                       formControlName="monthlyBudget" 
+                       type="number" 
+                       step="0.01"
+                       placeholder="50000"
+                       [class.border-red-500]="form.get('monthlyBudget')?.invalid && form.get('monthlyBudget')?.touched"
+                       [class.border-green-500]="form.get('monthlyBudget')?.valid && form.get('monthlyBudget')?.value"
+                       class="w-full" />
+              </span>
+            </div>
+
+            <div class="field">
+              <label for="momGrowth" class="block text-xs font-semibold text-gray-700 mb-1">
+                MoM Growth %
+              </label>
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-chart-line text-gray-400 text-sm"></i>
+                <input pInputText 
+                       id="momGrowth" 
+                       formControlName="momGrowthPercent" 
+                       type="number" 
+                       step="0.01"
+                       placeholder="15.5"
+                       class="w-full" />
+              </span>
+            </div>
+
+            <div class="field">
+              <label for="currency" class="block text-xs font-semibold text-gray-700 mb-1">Currency</label>
+              <span class="p-input-icon-left w-full">
+                <i class="pi pi-wallet text-gray-400 text-sm"></i>
+                <input pInputText 
+                       id="currency" 
+                       formControlName="currency" 
+                       type="text" 
+                       placeholder="USD"
+                       maxlength="3"
+                       class="w-full uppercase" />
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Section -->
+        <div class="mb-5">
+          <div class="flex items-center gap-2 mb-3 pb-2 border-b border-purple-200">
+            <div class="bg-purple-100 p-2 rounded">
+              <i class="pi pi-info-circle text-purple-600 text-lg"></i>
+            </div>
+            <h2 class="text-lg font-bold text-gray-800">Status</h2>
+          </div>
+
+          <div class="field">
+            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-md border border-gray-200">
+              <p-checkbox id="isActive" 
+                          formControlName="isActive" 
+                          [binary]="true"></p-checkbox>
+              <div>
+                <label for="isActive" class="font-semibold text-gray-800 cursor-pointer text-sm">Active Status</label>
+                <p class="text-xs text-gray-500">Enable if company is operational</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex gap-3 pt-4 border-t border-gray-200">
+          <button pButton 
+                  type="submit" 
+                  label="Create Company" 
+                  icon="pi pi-check" 
+                  [loading]="submitting"
+                  [disabled]="form.invalid"
+                  class="flex-1 p-button-success"></button>
+          <button pButton 
+                  type="button" 
+                  label="Cancel" 
+                  icon="pi pi-times" 
+                  severity="secondary"
+                  routerLink="/"
+                  class="flex-1"></button>
+        </div>
+      </form>
+    </p-card>
+  </div>
+</div>

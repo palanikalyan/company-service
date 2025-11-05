@@ -1,0 +1,21 @@
+.container { max-width: 800px; margin: 0 auto; padding: 1rem; }
+.card { background: white; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+/* Fix icon overlap with input text */
+::ng-deep .p-input-icon-left > input {
+  padding-left: 2.5rem !important;
+}
+
+::ng-deep .p-input-icon-left > i:first-of-type {
+  left: 0.75rem;
+}
+
+/* Ensure proper spacing for all input fields */
+::ng-deep .p-inputtext {
+  width: 100%;
+}
+
+/* Fix textarea styling */
+textarea.w-full {
+  font-family: inherit;
+}

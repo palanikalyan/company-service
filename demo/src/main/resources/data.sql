@@ -1,8 +1,3 @@
-INSERT INTO users (username, password, email, role) VALUES
-('neha', '12345', 'neha@gmail.com', 'company'),
-('kiran', 'password', 'kiran@gmail.com', 'company'),
-('admin', 'admin123', 'admin@company.com', 'admin');
-
 -- ============================================
 -- 🏦 INSERT BANK DETAILS
 -- ============================================
@@ -24,3 +19,11 @@ VALUES
 ('CodeCrafters', 'Arjun Rao', 'Sneha Iyer', 'Freelance software and creative design agency.', TRUE, 150000.00, 12500.00, 5.00, 'USD', 3, 'CCVDE9876L'),
 ('FutureVision Pvt Ltd', 'Priya Mehta', 'Kunal Joshi', 'AI-driven analytics and business automation solutions.', TRUE, 2500000.00, 208333.33, 4.75, 'INR', 4, 'DDFGT5432R'),
 ('Innovatech Solutions', 'Vikram Das', 'Sonia Gupta', 'Cutting-edge R&D for IoT and smart devices.', TRUE, 750000.00, 62500.00, 3.20, 'USD', 5, 'EEFHG2233P');
+
+-- ============================================
+-- 👥 INSERT USERS (after companies are created)
+-- ============================================
+INSERT INTO users (username, password, email, role, company_id) VALUES
+('neha', '12345', 'neha@gmail.com', 'COMPANY', 1),
+('kiran', 'password', 'kiran@gmail.com', 'COMPANY', 2),
+('admin', 'admin123', 'admin@company.com', 'ADMIN', NULL);
